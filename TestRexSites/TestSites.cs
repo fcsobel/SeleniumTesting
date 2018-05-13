@@ -5,8 +5,9 @@ using AventStack.ExtentReports.Reporter;
 using NHtmlUnit;
 using NHtmlUnit.Html;
 using NUnit.Framework;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-
+using OpenQA.Selenium.Support.UI;
 
 namespace TestRexSites
 {
@@ -20,35 +21,143 @@ namespace TestRexSites
 		public ExtentTest childTest;
 		public ExtentHtmlReporter htmlReporter;
 
-		[OneTimeSetUp]
-		public void TestSetup()
+		[Test]
+		public void AddToCart()
 		{
-			webClient = new WebClient();
+			var driver = new ChromeDriver();
 
-			var path = System.Reflection.Assembly.GetCallingAssembly().CodeBase;
-			string actuaPath = path.Substring(0, path.IndexOf("bin"));
-			string projectPath = new Uri(actuaPath).LocalPath;
+			string url = "http://www.reservebranson.com";
 
-			string reportPath = projectPath + "Reports\\MyOwnReport.html";
+			// goto site
+			driver.Navigate().GoToUrl(url);
 
-			// initialize ExtentReports and attach the HtmlReporter
-			extent = new ExtentReports();
+			// goto attractions
+			driver.FindElement(By.XPath("//a[contains(text(),'Attractions')]")).Click();
 
-			// initialize the HtmlReporter
-			htmlReporter = new ExtentHtmlReporter(reportPath);
+			// select tickets on first attraction
+			driver.FindElement(By.XPath("//a[contains(text(),'Select Tickets')]")).Click();
 
-			// load config
-			htmlReporter.LoadConfig(projectPath + "extent-config.xml");
+			// select date on detail page
+			driver.FindElement(By.XPath("//a[contains(text(),'Select Tickets')]")).Click();
 
-			// attach only HtmlReporter
-			extent.AttachReporter(htmlReporter);
+			WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0, 0, 10));
+			wait.Until(x => x.FindElement(By.XPath("//a[contains(text(),'Add to Cart')]")));
 
-			extent.AddSystemInfo("Host Name", "Test");
-			extent.AddSystemInfo("Environment", "QA");
-			extent.AddSystemInfo("User Name", "Joe");
+			// add to cart
+			driver.FindElement(By.XPath("//a[contains(text(),'Add to Cart')]")).Click();
 
-			
+
+			var item = driver.FindElement(By.XPath("//a[contains(text(),'No, thanks')]"));
+			wait.Until(x => item.Displayed);
+
+			driver.FindElement(By.XPath("//a[contains(text(),'No, thanks')]")).Click();
+
+			// go to cart
+			//driver.FindElement(By.XPath("css=a.btn-ghost")).Click();
+
+			// checkout
+			driver.FindElement(By.XPath("//a[contains(text(),'Checkout')]")).Click();
+
+
+			//driver.FindElement(By.XPath("//a[contains(text(),'Select Date')]")).Click();
+
+			// create new account
+			var textbox = driver.FindElement(By.Id("Email"));
+			textbox.SendKeys("test+1@gmail.com");
+			wait.Until(x => x.FindElement(By.Id("FirstName")));
+			textbox = driver.FindElement(By.Id("FirstName"));
+			wait.Until(x => textbox.Displayed);
+			textbox.SendKeys("Test");
+			textbox = driver.FindElement(By.Id("LastName"));
+			textbox.SendKeys("User");
+			driver.FindElement(By.Id("AccountInfoSubmitBtn")).Click();
+
+
+			Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
+
+			//Use it as you want now
+			//string screenshot = ss.AsBase64EncodedString;
+			//byte[] screenshotAsByteArray = ss.AsByteArray;
+			ss.SaveAsFile("C:\\Users\\Fred\\Documents\\Visual Studio 2017\\Projects\\Testing\\TestRexSites\\Reports\\test1.png", ScreenshotImageFormat.Png); //use any of the built in image formating
+			//ss.ToString();//same as string screenshot = ss.AsBase64EncodedString;
+
+			// wait for calendar
+			//WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0, 0, 10));
+			//wait.Until(x => x.FindElement(By.ClassName("calendar-table")));
+			driver.Quit();
 		}
+
+
+
+		[Test]
+		public void CreateNewAccount()
+		{
+			var driver = new ChromeDriver();
+
+			string url = "http://www.reservebranson.com";
+
+			driver.Navigate().GoToUrl(url);
+
+			driver.Navigate().GoToUrl(url + "/customer/account");
+
+			var textbox = driver.FindElement(By.Id("Email"));
+			textbox.SendKeys("fred.sobel+1@gmail.com");
+
+			WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0, 0, 10));
+			wait.Until(x => x.FindElement(By.Id("FirstName")));
+
+			textbox = driver.FindElement(By.Id("FirstName"));
+			wait.Until(x => textbox.Displayed);
+
+			textbox.SendKeys("Test");
+
+			textbox = driver.FindElement(By.Id("LastName"));
+
+			textbox.SendKeys("User");
+
+			driver.FindElement(By.Id("AccountInfoSubmitBtn")).Click();
+
+			//driver.Navigate().GoToUrl(url + "account");
+
+			driver.Quit();
+		}
+
+		[Test]
+		public void CreateAccount()
+		{
+			var driver = new ChromeDriver();
+
+			string url = "http://www.reservebranson.com";
+
+			driver.Navigate().GoToUrl(url);
+
+			driver.Navigate().GoToUrl(url + "/customer/account");
+
+			var textbox = driver.FindElement(By.Id("Email"));
+			textbox.Clear();
+			textbox.SendKeys("fred.sobel+1@gmail.com");
+
+			WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0, 0, 10));
+			wait.Until(x => x.FindElement(By.Id("FirstName")));
+
+			textbox = driver.FindElement(By.Id("FirstName"));
+			wait.Until(x => textbox.Displayed);
+
+			textbox.SendKeys("Test");
+
+			textbox = driver.FindElement(By.Id("LastName"));
+
+			textbox.SendKeys("User");
+
+			driver.FindElement(By.Id("AccountInfoSubmitBtn")).Click();
+
+			//driver.Navigate().GoToUrl(url + "account");
+
+			driver.Quit();
+		}
+
+
+
 
 		[Test]
 		public void Can_Load_Google_Homepage()
@@ -106,7 +215,7 @@ namespace TestRexSites
 					childTest.Log(Status.Fail, path);
 				}
 
-				
+
 
 				//Assert.IsTrue(resp.StatusCode == 200);
 			}
@@ -174,17 +283,47 @@ namespace TestRexSites
 		public void GetResult()
 		{
 			var statis = TestContext.CurrentContext.Result.Outcome.Status;
-			var strackTrave = string.Format("<pre>{0}</pre>", TestContext.CurrentContext.Result.StackTrace); 
+			var strackTrave = string.Format("<pre>{0}</pre>", TestContext.CurrentContext.Result.StackTrace);
 			var errormessage = TestContext.CurrentContext.Result.Message;
 
 			if (statis == NUnit.Framework.Interfaces.TestStatus.Failed)
 			{
 				test.Log(Status.Fail, strackTrave + errormessage);
 			}
-			
+
 			//extent.Flush();
 
 			//htmlReporter.Stop();
+		}
+
+		[OneTimeSetUp]
+		public void TestSetup()
+		{
+			webClient = new WebClient();
+
+			var path = System.Reflection.Assembly.GetCallingAssembly().CodeBase;
+			string actuaPath = path.Substring(0, path.IndexOf("bin"));
+			string projectPath = new Uri(actuaPath).LocalPath;
+
+			string reportPath = projectPath + "Reports\\MyOwnReport.html";
+
+			// initialize ExtentReports and attach the HtmlReporter
+			extent = new ExtentReports();
+
+			// initialize the HtmlReporter
+			htmlReporter = new ExtentHtmlReporter(reportPath);
+
+			// load config
+			htmlReporter.LoadConfig(projectPath + "extent-config.xml");
+
+			// attach only HtmlReporter
+			extent.AttachReporter(htmlReporter);
+
+			extent.AddSystemInfo("Host Name", "Test");
+			extent.AddSystemInfo("Environment", "QA");
+			extent.AddSystemInfo("User Name", "Joe");
+
+
 		}
 
 
@@ -195,6 +334,8 @@ namespace TestRexSites
 			//htmlReporter.Stop();
 			extent.Flush();
 			webClient.Close();
-		}	
+		}
+
+
 	}
 }
