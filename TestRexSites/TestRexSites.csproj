@@ -186,6 +186,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="extent-config.xml" />
+    <Content Include="Reports\checkout.png" />
+    <Content Include="Reports\detail.png" />
     <Content Include="Reports\MyOwnReport.html" />
     <Content Include="Reports\test1.png" />
   </ItemGroup>

@@ -15,7 +15,6 @@ namespace TestRexSites
 	public class TestSites
 	{
 		private WebClient webClient;
-
 		public ExtentReports extent;
 		public ExtentTest test;
 		public ExtentTest childTest;
@@ -43,6 +42,9 @@ namespace TestRexSites
 			WebDriverWait wait = new WebDriverWait(driver, new TimeSpan(0, 0, 10));
 			wait.Until(x => x.FindElement(By.XPath("//a[contains(text(),'Add to Cart')]")));
 
+			Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
+			ss.SaveAsFile("C:\\Users\\Fred\\Documents\\Visual Studio 2017\\Projects\\Testing\\TestRexSites\\Reports\\detail.png", ScreenshotImageFormat.Png); //use any of the built in image formating
+
 			// add to cart
 			driver.FindElement(By.XPath("//a[contains(text(),'Add to Cart')]")).Click();
 
@@ -58,6 +60,8 @@ namespace TestRexSites
 			// checkout
 			driver.FindElement(By.XPath("//a[contains(text(),'Checkout')]")).Click();
 
+			ss = ((ITakesScreenshot)driver).GetScreenshot();
+			ss.SaveAsFile("C:\\Users\\Fred\\Documents\\Visual Studio 2017\\Projects\\Testing\\TestRexSites\\Reports\\checkout.png", ScreenshotImageFormat.Png); //use any of the built in image formating
 
 			//driver.FindElement(By.XPath("//a[contains(text(),'Select Date')]")).Click();
 
@@ -72,8 +76,7 @@ namespace TestRexSites
 			textbox.SendKeys("User");
 			driver.FindElement(By.Id("AccountInfoSubmitBtn")).Click();
 
-
-			Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
+			ss = ((ITakesScreenshot)driver).GetScreenshot();
 
 			//Use it as you want now
 			//string screenshot = ss.AsBase64EncodedString;
